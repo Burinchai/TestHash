@@ -67,6 +67,42 @@ server.post('/actcode', function (req, res) {
   );
 });
 
+server.get('/check', function (req, res) {
+  const actCodeParam = req.query.actCode;
+
+  if (!actCodeParam) {
+    return res.status(400).json({ error: 'actCode is required in the query parameters' });
+  }
+
+  pool.execute(
+    'SELECT actname.*, actcode.act_Code FROM actname INNER JOIN actcode ON actname.act_Name=actcode.act_Name WHERE act_Code = ?',
+    [actCodeParam],
+    function (errS, resultsS) {
+      if (errS) {
+        console.error('Error querying the database:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+      } else {
+        console.log("Join activity successfully");
+        const DactCodeParam = resultsS[0].act_Code;
+  
+
+
+        pool.execute('DELETE FROM actcode WHERE act_Code = ?',
+        [DactCodeParam],
+        function (errD, resultsD) {
+          if(errD){
+            console.log("error");
+          } else{
+            console.log("Deleting Succesfully");
+            res.json(resultsD);
+          }
+        })
+      }
+    }
+  );
+});
+
+
 
 
 
